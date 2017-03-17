@@ -445,7 +445,9 @@ if $yum_max_speed {
 }
 
   include ::mongodb::client
-  include ::pulp::apache
+  if $manage_httpd {
+    include ::pulp::apache
+  }
   include ::pulp::database
   include ::pulp::broker
 
