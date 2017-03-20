@@ -99,7 +99,7 @@ module Puppet
           https.cert = OpenSSL::X509::Certificate.new(cert_raw)
           https.key = OpenSSL::PKey::RSA.new(cert_raw)
           https.verify_mode = OpenSSL::SSL::VERIFY_PEER
-          #  https.ca_file = '/etc/pki/ca-trust/source/anchors/puppet_ca.pem'
+          https.ca_file = '/etc/pki/pulp/ca.crt'
           resp = https.request req
           if resp.code == '200'
             JSON.parse(resp.body)
