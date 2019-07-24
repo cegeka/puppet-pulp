@@ -57,7 +57,7 @@ describe 'pulp::config' do
     end
   end
 
-  context 'with database auth parameters on unsupported mongo' do
+  context 'with database auth parameters on supported mongo' do
     let :pre_condition do
       "class {'pulp':
         db_username => 'rspec',
@@ -69,29 +69,27 @@ describe 'pulp::config' do
       default_facts
     end
 
-    it "should not configure auth" do
-      should contain_file('/etc/pulp/server.conf').
-        without_content(/^username: rspec$/).
-        without_content(/^password: rsp3c4l1f3$/)
-    end
-  end
-
-  context 'with database auth parameters on supported mongo' do
-    let :pre_condition do
-      "class {'pulp':
-        db_username => 'rspec',
-        db_password => 'rsp3c4l1f3',
-       }"
-    end
-
-    let :facts do
-      default_facts.merge(:mongodb_version => '2.6.1')
-    end
-
     it "should configure auth" do
       should contain_file('/etc/pulp/server.conf').
         with_content(/^username: rspec$/).
         with_content(/^password: rsp3c4l1f3$/)
+    end
+  end
+
+  context 'with worker timeout' do
+    let :pre_condition do
+      "class {'pulp':
+        worker_timeout => 80,
+       }"
+    end
+
+    let :facts do
+      default_facts
+    end
+
+    it "should configure worker timeout param" do
+      should contain_file('/etc/pulp/server.conf').
+        with_content(/^worker_timeout: 80$/)
     end
   end
 
@@ -171,6 +169,55 @@ describe 'pulp::config' do
       should contain_file("/etc/pulp/server/plugins.conf.d/puppet_importer.json").with(importer_params)
       should contain_file("/etc/pulp/server/plugins.conf.d/docker_importer.json").with(importer_params)
       should contain_file("/etc/pulp/server/plugins.conf.d/ostree_importer.json").with(importer_params)
+    end
+  end
+
+  describe 'repo_auth' do
+    context 'by default' do
+      let :pre_condition do
+        "class {'pulp':}"
+      end
+
+      let :facts do
+        default_facts
+      end
+
+      it 'defaults to false' do
+        should contain_file('/etc/pulp/repo_auth.conf').
+          with_content(/^enabled: false$/)
+      end
+    end
+    context 'when set to true' do
+      let :pre_condition do
+        "class {'pulp':
+          repo_auth => true,
+        }"
+      end
+
+      let :facts do
+        default_facts
+      end
+
+      it 'sets enabled to true' do
+        should contain_file('/etc/pulp/repo_auth.conf').
+          with_content(/^enabled: true$/)
+      end
+    end
+    context 'when set to false' do
+      let :pre_condition do
+        "class {'pulp':
+          repo_auth => false,
+        }"
+      end
+
+      let :facts do
+        default_facts
+      end
+
+      it 'sets enabled to false' do
+        should contain_file('/etc/pulp/repo_auth.conf').
+          with_content(/^enabled: false$/)
+      end
     end
   end
 end

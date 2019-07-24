@@ -1,7 +1,9 @@
 # Pulp Node Install Packages
-class pulp::child::install {
-  package { [
-    'pulp-katello',
-    'pulp-nodes-child',
-    'katello-agent']: }
+# @api private
+class pulp::child::install (
+  $packages = ['pulp-katello', 'pulp-nodes-child', 'katello-agent'],
+) {
+  package { $packages:
+    ensure => installed,
+  }
 }

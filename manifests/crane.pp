@@ -1,42 +1,53 @@
-# == Class: pulp::crane
-#
 # Install and configure Crane
 #
-# === Parameters:
+# @param debug
+#   Enable debug logging
 #
-# $debug::                      Enable debug logging
-#                               type:boolean
+# @param server_name
+#   The server name on the vhost
 #
-# $key::                        Path to the SSL key for https
+# @param key
+#   Path to the SSL key for https
 #
-# $cert::                       Path to the SSL certificate for https
+# @param cert
+#   Path to the SSL certificate for https
 #
-# $ca_cert::                    Path to the SSL CA cert for https
+# @param ca_cert
+#   Path to the SSL CA cert for https
 #
-# $port::                       Port for Crane to run on
-#                               type:integer
+# @param ssl_chain
+#   Path to the SSL chain file for https
 #
-# $data_dir::                   Directory containing docker v1/v2 artifacts published by pulp
+# @param port
+#   Port for Crane to run on
 #
-# $data_dir_polling_interval::  The number of seconds between checks for updates to metadata files in the data_dir
-#                               type:integer
+# @param data_dir
+#   Directory containing docker v1/v2 artifacts published by pulp
+#
+# @param data_dir_polling_interval
+#   The number of seconds between checks for updates to metadata files in the data_dir
+#
+# @param ssl_protocol
+#   SSLProtocol configuration to use
 class pulp::crane (
-  $debug                     = $::pulp::crane::params::debug,
-  $port                      = $::pulp::crane::params::port,
-  $data_dir                  = $::pulp::crane::params::data_dir,
-  $data_dir_polling_interval = $::pulp::crane::params::data_dir_polling_interval,
-  $key                       = $::pulp::crane::params::key,
-  $cert                      = $::pulp::crane::params::cert,
-  $ca_cert                   = $::pulp::crane::params::ca_cert,
-  ) inherits pulp::crane::params {
+  Stdlib::Absolutepath $key,
+  Stdlib::Absolutepath $cert,
+  Stdlib::Absolutepath $ca_cert,
 
-  validate_bool($debug)
-  validate_absolute_path($data_dir, $key, $cert, $ca_cert)
-  validate_integer($port)
-  validate_integer($data_dir_polling_interval)
+  Boolean $debug = false,
+  Stdlib::Fqdn $server_name = $::fqdn,
+  Stdlib::Port $port = 5000,
+  Stdlib::Absolutepath $data_dir = '/var/lib/crane/metadata',
+  Integer[0] $data_dir_polling_interval = 60,
+  Optional[Stdlib::Absolutepath] $ssl_chain = undef,
+  Optional[String] $ssl_protocol = undef,
+){
 
-  class { '::pulp::crane::install': } ~>
-  class { '::pulp::crane::config': } ~>
-  class { '::pulp::crane::apache': } ->
-  Class['pulp::crane']
+  contain pulp::crane::install
+  contain pulp::crane::config
+  contain pulp::crane::apache
+
+  Class['pulp::crane::install']
+  ~> Class['pulp::crane::config']
+  ~> Class['pulp::crane::apache']
 }

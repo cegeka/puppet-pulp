@@ -1,23 +1,35 @@
 ---
 # This file is managed centrally by modulesync
-#   https://github.com/katello/foreman-installer-modulesync
-rvm:
-  - 2.1.5
-env:
-  - PUPPET_VERSION=3.5 ONLY_OS=redhat-7-x86_64,centos-7-x86_64
-  - PUPPET_VERSION=3.5 FUTURE_PARSER=yes ONLY_OS=redhat-7-x86_64,centos-7-x86_64
-  - PUPPET_VERSION=4.0 ONLY_OS=redhat-7-x86_64,centos-7-x86_64
+#   https://github.com/theforeman/foreman-installer-modulesync
 matrix:
   fast_finish: true
   include:
-    # Only EL7 uses Ruby 2.0.0 to run Puppet 3.x
-    - rvm: 2.0.0
-      env: PUPPET_VERSION=3.5 ONLY_OS="centos-7-x86_64"
-    # Only Puppet 4.x supports Ruby 2.2. Also limit the OS set we test Ruby 2.2 with.
-    - rvm: 2.2.3
-      env: PUPPET_VERSION=4.0 ONLY_OS=redhat-7-x86_64,centos-7-x86_64
-    # Only Puppet >= 4.4 supports Ruby 2.3. Also limit the OS set we test Ruby 2.3 with.
-    - rvm: 2.3.0
-      env: PUPPET_VERSION=4.4 ONLY_OS=redhat-7-x86_64,centos-7-x86_64
-bundler_args: --without development
-sudo: false
+    - rvm: 2.4.1
+      env: PUPPET_VERSION=5.0
+    - rvm: 2.5.1
+      env: PUPPET_VERSION=6.0
+    # Acceptance tests
+    - rvm: 2.5.1
+      env:
+        - BEAKER_PUPPET_COLLECTION=puppet5
+        - BEAKER_setfile=centos7-64{hostname=centos7-64.example.com}
+      script: bundle exec rake beaker
+      services: docker
+      bundler_args: --without development
+      before_install:
+        - echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+        - sudo service docker restart
+
+    - rvm: 2.5.1
+      env:
+        - BEAKER_PUPPET_COLLECTION=puppet6
+        - BEAKER_setfile=centos7-64{hostname=centos7-64.example.com}
+      script: bundle exec rake beaker
+      services: docker
+      bundler_args: --without development
+      before_install:
+        - echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+        - sudo service docker restart
+
+bundler_args: --without system_tests development
+dist: xenial

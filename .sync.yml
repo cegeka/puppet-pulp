@@ -1,6 +1,20 @@
 ---
+.puppet-lint.rc:
+  extra_disabled_lint_checks:
+    - arrow_on_right_operand_line
+.travis.yml:
+  beaker_sets:
+    - centos7-64
+  test_all_rvms: false
 Rakefile:
   param_docs_pattern:
     - manifests/admin.pp
     - manifests/consumer.pp
     - manifests/init.pp
+spec/spec_helper.rb:
+  custom_facts:
+    - name: systemd
+      value: true
+      source: puppet-systemd
+spec/spec_helper_acceptance.rb:
+  install_epel: true

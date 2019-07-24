@@ -1,16 +1,17 @@
 # Pulp Consumer Install Packages
+# @api private
 class pulp::consumer::install {
   if $pulp::consumer::messaging_transport == 'qpid' {
     ensure_packages(['python-gofer-qpid'], {
-      ensure => $pulp::consumer::messaging_version,
-    }
+        ensure => $pulp::consumer::messaging_version,
+      }
     )
   }
 
   if $pulp::consumer::messaging_transport == 'rabbitmq' {
     ensure_packages(['python-gofer-amqp'], {
-      ensure => $pulp::consumer::messaging_version,
-    }
+        ensure => $pulp::consumer::messaging_version,
+      }
     )
   }
 

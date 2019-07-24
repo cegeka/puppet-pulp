@@ -1,11 +1,12 @@
 # Pulp Consumer Params
+# @api private
 class pulp::consumer::params {
   $version = 'installed'
   $enable_puppet = false
   $enable_nodes = false
   $enable_rpm = true
 
-  $host = $::fqdn
+  $host = $facts['fqdn']
   $port = 443
   $api_prefix = '/pulp/api'
   $verify_ssl = true
@@ -40,6 +41,7 @@ class pulp::consumer::params {
   $messaging_host = $host
   $messaging_port = 5672
   $messaging_transport = 'qpid'
+  $messaging_vhost = undef
   $messaging_cacert = undef
   $messaging_clientcert = undef
   $messaging_version = 'present'

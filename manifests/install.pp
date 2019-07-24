@@ -1,19 +1,24 @@
 # Pulp Installation Packages
-# Private class
+# @api private
 class pulp::install {
   package { ['pulp-server', 'pulp-selinux', 'python-pulp-streamer']: ensure => $pulp::version, }
 
+  $python_package_prefix = $facts['operatingsystemmajrelease'] ? {
+    '7'     => 'python',
+    default => 'python2',
+  }
+
   if $pulp::messaging_transport == 'qpid' {
-    ensure_packages(['python-gofer-qpid'], {
-      ensure => $pulp::messaging_version,
-    }
+    ensure_packages(["${python_package_prefix}-gofer-qpid"], {
+        ensure => $pulp::messaging_version,
+      }
     )
   }
 
   if $pulp::messaging_transport == 'rabbitmq' {
-    ensure_packages(['python-gofer-amqp'], {
-      ensure => $pulp::messaging_version,
-    }
+    ensure_packages(["${python_package_prefix}-gofer-amqp"], {
+        ensure => $pulp::messaging_version,
+      }
     )
   }
 
@@ -25,8 +30,12 @@ class pulp::install {
     package { ['pulp-nodes-parent']: ensure => $pulp::version, }
   }
 
-  if $pulp::enable_rpm {
+  if $pulp::enable_rpm or $pulp::enable_iso {
     package { ['pulp-rpm-plugins']: ensure => $pulp::version, }
+  }
+
+  if $pulp::enable_deb {
+    package { ['pulp-deb-plugins']: ensure => $pulp::version, }
   }
 
   if $pulp::enable_docker {

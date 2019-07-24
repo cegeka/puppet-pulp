@@ -1,26 +1,16 @@
 # Pulp Node Configuration
-class pulp::child::config {
-
+# @api private
+class pulp::child::config(
+  $node_certificate = $pulp::node_certificate,
+  $verify_ssl = $pulp::node_verify_ssl,
+  $ca_path = $pulp::node_server_ca_cert,
+  $oauth_user_id = $pulp::node_oauth_effective_user,
+  $oauth_key = $pulp::node_oauth_key,
+  $oauth_secret = $pulp::node_oauth_secret,
+) {
   file { '/etc/pulp/nodes.conf':
     ensure  => 'file',
     content => template('pulp/nodes.conf.erb'),
-  }
-
-  include ::apache
-
-  apache::vhost { 'pulp-node-ssl':
-    servername        => $::fqdn,
-    docroot           => '/var/www/html',
-    port              => 443,
-    priority          => '25',
-    ssl               => true,
-    ssl_cert          => $pulp::child::ssl_cert,
-    ssl_key           => $pulp::child::ssl_key,
-    ssl_ca            => $pulp::ca_cert,
-    ssl_verify_client => 'optional',
-    ssl_options       => '+StdEnvVars',
-    ssl_verify_depth  => '3',
-    custom_fragment   => template('pulp/etc/httpd/conf.d/_ssl_vhost.conf.erb'),
   }
 
   # we need to make sure the goferd reads the current oauth credentials to talk
