@@ -555,10 +555,15 @@ class pulp (
   contain pulp::config
   contain pulp::database
   contain pulp::service
-  contain pulp::apache
 
-  Class['pulp::install'] -> Class['pulp::config'] -> Class['pulp::database'] ~> Class['pulp::service', 'pulp::apache']
-  Class['pulp::config'] ~> Class['pulp::service', 'pulp::apache']
+  if $manage_httpd {
+    contain pulp::apache
+    Class['pulp::install'] -> Class['pulp::config'] -> Class['pulp::database'] ~> Class['pulp::service', 'apache']
+    Class['pulp::config'] ~> Class['pulp::service', 'apache']
+  }
+
+  Class['pulp::install'] -> Class['pulp::config'] -> Class['pulp::database'] ~> Class['pulp::service']
+  Class['pulp::config'] ~> Class['pulp::service']
 
   if $enable_admin {
     if $ssl_username and $ssl_username != '' {
@@ -580,7 +585,7 @@ class pulp (
       login_method  => $login_method,
       username      => $default_login,
       password      => $default_password,
-      require       => Class['pulp::apache'],
+      require       => Class['apache']
     }
   }
 }
